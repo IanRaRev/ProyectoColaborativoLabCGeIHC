@@ -37,6 +37,7 @@ Cylinder cylinder2(20, 20, 0.5, 0.5);
 Cylinder cylinder3(20, 20, 0.5, 0.5);
 Cylinder cylinder4(20, 20, 0.5, 0.5);
 Box box,box1,box2,box3,box4,box5,box6,box7;
+Box Suelo, way;
 
 
 Shader shaderColor;
@@ -57,6 +58,7 @@ textureID19, textureID20, textureID21,
 textureID22, textureID23, textureID24,
 textureID25, textureID26, textureCubeTexture;
 GLuint cubeTextureID;
+GLuint textureCespedID, Camino;
 
 GLenum types[6] = {
 	GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -179,7 +181,14 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	box6.init();
 	box7.init();
 
-	camera->setPosition(glm::vec3(0.0f, 0.0f, 0.4f));
+	/* */
+	Suelo.init();
+	way.init();
+
+	camera->setPosition(glm::vec3(0.0f, 0.0f, 45.0f));
+
+	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
+
 	/*
 	//-------TEXTURAS----------------------------
 	Texturas para cada uno de los juegos
@@ -188,12 +197,53 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	|
 	|-------------------------------------------
 	*/
-
-	// Textura										JUEGO 1
 	int imageWidth, imageHeight;
-	Texture texture("../../Textures/azul.jpg");
+
+
+	/* Textura suelo de la feria */
+	Texture texture = Texture("../../Textures/cesped.jpg");
 	FIBITMAP* bitmap = texture.loadImage(false);
 	unsigned char * data = texture.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &textureCespedID);
+	glBindTexture(GL_TEXTURE_2D, textureCespedID);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	texture.freeImage(bitmap);
+
+	/* Camino de la feria */
+	texture  = Texture("../../Textures/Camino.jpg");
+	bitmap = texture.loadImage(false);
+	data = texture.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &Camino);
+	glBindTexture(GL_TEXTURE_2D, Camino);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	texture.freeImage(bitmap);
+
+	// Textura										JUEGO 1
+	texture = Texture("../../Textures/azul.jpg");
+	bitmap = texture.loadImage(false);
+	data = texture.convertToData(bitmap, imageWidth, imageHeight);
 	glGenTextures(1, &textureID1);
 	glBindTexture(GL_TEXTURE_2D, textureID1);
 	// set the texture wrapping parameters
@@ -453,7 +503,9 @@ void destroy() {
 	box6.destroy();
 	box7.destroy();
 
-
+	/* */
+	Suelo.destroy();
+	way.destroy();
 
 }
 
@@ -1111,19 +1163,31 @@ Se manejan los eventos para mover izquierda, dercha , acercar y alejar.
 
 
 
-		
+		/* AMBIENTE */
 
-		
-		
-		glBindTexture(GL_TEXTURE_2D, 0);
+		/* Suelo */
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureCespedID);
+		Suelo.setShader(&shaderLighting);
+		Suelo.setProjectionMatrix(projection);
+		Suelo.setViewMatrix(view);
+		Suelo.setPosition(glm::vec3(0.0f, -0.7f, 0.0f));
+		Suelo.setScale(glm::vec3(90.0f, 0.001f, 90.0f));
+		Suelo.render();
 
-		if (angle > 2 * M_PI)
-			angle = 0.0;
-		else
-			angle += 0.001;
+		/* Camino */
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Camino);
+		way.setShader(&shaderTexture);
+		way.setProjectionMatrix(projection);
+		way.setViewMatrix(view);
+		way.setPosition(glm::vec3(0.0f, -0.699f, 0.0f));
+		way.setScale(glm::vec3(2.0f, 0.0f, 85.0f));
+		way.render();
 
-		
-		
+		way.setPosition(glm::vec3(0.0f, -0.699f, 27.0f));
+		way.setScale(glm::vec3(20.0f, 0.0f, 2.0f));
+		way.render();
 	
 
 
