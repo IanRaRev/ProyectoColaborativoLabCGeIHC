@@ -25,6 +25,8 @@
 #include "Headers/FirstPersonCamera.h"
 //Texture includes
 #include "Headers/Texture.h"
+//Model includes
+#include "Headers/Model.h"
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
@@ -37,6 +39,11 @@ Cylinder cylinder2(20, 20, 0.5, 0.5);
 Cylinder cylinder3(20, 20, 0.5, 0.5);
 Cylinder cylinder4(20, 20, 0.5, 0.5);
 Box box,box1,box2,box3,box4,box5,box6,box7;
+/*Carros chocones */
+/* Carros Chocones */
+Box baseCCH;
+Cylinder columnasCCH(20, 20, 0.5, 0.5);
+/* Ambiente*/
 Box Suelo, way;
 
 
@@ -49,6 +56,11 @@ Shader shaderPointLight;
 Shader shaderSpotLight;
 Shader shaderLighting; // contiene todas las luces
 
+/* M O D E L O S */
+/* Ambiente*/
+Model arbol;
+Model fence;
+
 GLuint textureID1, textureID2, textureID3,textureID4,
 textureID5,textureID6, textureID7, textureID8, 
 textureID9, textureID10,textureID11, textureID12, 
@@ -58,7 +70,9 @@ textureID19, textureID20, textureID21,
 textureID22, textureID23, textureID24,
 textureID25, textureID26, textureCubeTexture;
 GLuint cubeTextureID;
+/* Texturas ambiente */
 GLuint textureCespedID, Camino;
+GLuint plataformaCCH;
 
 GLenum types[6] = {
 	GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -181,13 +195,24 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	box6.init();
 	box7.init();
 
-	/* */
+
+	/* Ambiente */
 	Suelo.init();
 	way.init();
+
+	/* Carros chocones */
+	baseCCH.init();
+	columnasCCH.init();
 
 	camera->setPosition(glm::vec3(0.0f, 0.0f, 45.0f));
 
 	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
+
+
+	/*  M O D E L O S */
+	/* Ambiente */
+	arbol.loadModel("../../models/Tree/Tree.obj");
+	fence.loadModel("../../models/fence01_obj/fence01.obj");
 
 	/*
 	//-------TEXTURAS----------------------------
@@ -226,6 +251,26 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	data = texture.convertToData(bitmap, imageWidth, imageHeight);
 	glGenTextures(1, &Camino);
 	glBindTexture(GL_TEXTURE_2D, Camino);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	texture.freeImage(bitmap);
+
+	/* Carros chocones */
+	texture = Texture("../../Textures/baseCCH.jpg");
+	bitmap = texture.loadImage(false);
+	data = texture.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &plataformaCCH);
+	glBindTexture(GL_TEXTURE_2D, plataformaCCH);
 	// set the texture wrapping parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -526,10 +571,13 @@ void destroy() {
 	box6.destroy();
 	box7.destroy();
 
-	/* */
+	/* Ambiente */
 	Suelo.destroy();
 	way.destroy();
 
+	/* Carros chocones */
+	baseCCH.destroy();
+	columnasCCH.destroy();
 }
 
 
@@ -668,21 +716,21 @@ void applicationLoop() {
 
 		glm::mat4 matrix0 = glm::mat4(1.0f);
 		matrix0 = glm::translate(matrix0, glm::vec3(0.0f, 0.0f, -4.0f));
-		glm::mat4 matrixs1 = glm::translate(matrix0, glm::vec3(0.0f,0.9f, 0.0f)); // esfera para primer juego 
+		glm::mat4 matrixs1 = glm::translate(matrix0, glm::vec3(0.0f, 0.9f, 0.0f)); // esfera para primer juego 
 		glm::mat4 matrix1 = glm::translate(matrix0, glm::vec3(0.0f, 0.9f, 0.0f)); //caja 
-		glm::mat4 matrix2 = glm::translate(matrixs1, glm::vec3(0.0f, -0.25f,0.0f));// cilindro medio
+		glm::mat4 matrix2 = glm::translate(matrixs1, glm::vec3(0.0f, -0.25f, 0.0f));// cilindro medio
 		glm::mat4 matrixs2 = glm::translate(matrix2, glm::vec3(0.0f, 0.0f, 0.35f));//brazo posterior 
 		glm::mat4 matrixs2_1 = glm::translate(matrix2, glm::vec3(0.0f, 0.0f, -0.35f));// brazo anterior 
-		
+
 
 		/*----------
 		/									MOVIMINETOS JUEGO 1
-	    */
+		*/
 
 		matrix2 = glm::rotate(matrixs2, rot1, glm::vec3(0.0f, 0.0f, 0.01f));
 		matrix2 = glm::rotate(matrixs2, rot2, glm::vec3(0.0f, 0.0f, 0.01f));
 		matrixs2 = glm::rotate(matrixs2, rot1, glm::vec3(0.0f, 0.0f, 0.01f));
-		matrixs2_1 = glm::rotate(matrixs2_1,rot1, glm::vec3(0.0f, 0.0f, 0.01f));
+		matrixs2_1 = glm::rotate(matrixs2_1, rot1, glm::vec3(0.0f, 0.0f, 0.01f));
 		matrixs2 = glm::rotate(matrixs2, rot2, glm::vec3(0.0f, 0.0f, 0.01f));
 		matrixs2_1 = glm::rotate(matrixs2_1, rot2, glm::vec3(0.0f, 0.0f, 0.01f));
 
@@ -733,7 +781,7 @@ void applicationLoop() {
 		glm::mat4 matrix3 = glm::translate(matrixs2, glm::vec3(0.0f, 0.0f, 0.57f)); //caja pasajeros 
 		glBindTexture(GL_TEXTURE_2D, textureID4);
 		matrix3 = glm::rotate(matrix3, 1.5708f, glm::vec3(0.0f, 0.1f, 0.0f));
-		matrix3 = glm::scale(matrix3, glm::vec3(0.7,0.7f,10.0f));
+		matrix3 = glm::scale(matrix3, glm::vec3(0.7, 0.7f, 10.0f));
 		cylinder.setShader(&shaderLighting);
 		cylinder.setProjectionMatrix(projection);
 		cylinder.setViewMatrix(view);
@@ -794,21 +842,21 @@ void applicationLoop() {
 		box.render(matrixs3);
 
 
-	/*------------				JUEGO 2		---------------------
-							CARRUSEL 
+		/*------------				JUEGO 2		---------------------
+								CARRUSEL
 
-							BASE DE TRES COLORES 
-	*/
+								BASE DE TRES COLORES
+		*/
 		glm::mat4 matrixs4 = glm::mat4(1.0f);
-		matrixs4 = glm::translate(matrixs4, glm::vec3(-1.3f, -0.5f,- 1.6f));   //BASE INFERIOR
+		matrixs4 = glm::translate(matrixs4, glm::vec3(-1.3f, -0.5f, -1.6f));   //BASE INFERIOR
 
-		
-		
+
+
 
 		//				MOVIMIENTOS JUEGO 2
 		matrixs4 = glm::rotate(matrixs4, rot1, glm::vec3(0.0f, 0.1f, 0.0f));
 		matrixs4 = glm::rotate(matrixs4, rot2, glm::vec3(0.0f, 0.1f, 0.0f));
-		
+
 
 		//DISCO DORADO
 		matrixs4 = glm::scale(matrixs4, glm::vec3(3.5f, 0.1f, 3.5f));
@@ -843,7 +891,7 @@ void applicationLoop() {
 		cylinder.setProjectionMatrix(projection);
 		cylinder.setViewMatrix(view);
 		cylinder.render(matrix10);
-	
+
 		//CILINDRO 1 PARA SOSTENER LOS CABALLOS 
 		//CABALLO 1
 		glm::mat4  matrix8 = glm::translate(matrixs4, glm::vec3(0.2f, 5.0f, -0.05f)); //TUBO 1
@@ -855,7 +903,7 @@ void applicationLoop() {
 		cylinder.setViewMatrix(view);
 		cylinder.render(matrix8);
 
-		glm::mat4  matrixs7 = glm::translate(matrix8, glm::vec3(0.0f,0.05f, -0.1f)); //caballo 1
+		glm::mat4  matrixs7 = glm::translate(matrix8, glm::vec3(0.0f, 0.05f, -0.1f)); //caballo 1
 		//matrixs7 = glm::rotate(matrixs7, 1.5708f, glm::vec3(0.1f, 0.0f, 0.0f));
 		matrixs7 = glm::scale(matrixs7, glm::vec3(0.3, 0.3f, 3.3f));
 		glBindTexture(GL_TEXTURE_2D, textureID9);
@@ -863,7 +911,7 @@ void applicationLoop() {
 		box.setProjectionMatrix(projection);
 		box.setViewMatrix(view);
 		box.render(matrixs7);
-		
+
 
 		//CABALLO 2
 		glm::mat4  matrix9 = glm::translate(matrixs4, glm::vec3(0.2f, 5.0f, 0.1f)); //TUBO 1
@@ -882,7 +930,7 @@ void applicationLoop() {
 		box.setProjectionMatrix(projection);
 		box.setViewMatrix(view);
 		box.render(matrixs8);
-		
+
 		//CABALLO 3
 		glm::mat4  matrix11 = glm::translate(matrixs4, glm::vec3(0.099f, 5.0f, 0.16f)); //TUBO 2
 		//matrixs = glm::rotate(matrixs3, 0.001f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -899,7 +947,7 @@ void applicationLoop() {
 		box.setProjectionMatrix(projection);
 		box.setViewMatrix(view);
 		box.render(matrixs9);
-	
+
 		//CARRUAJE 1
 		glm::mat4  matrix12 = glm::translate(matrixs4, glm::vec3(0.05, 5.0f, 0.22f)); //TUBO 2
 		matrix12 = glm::scale(matrix12, glm::vec3(0.02f, 6.5f, 0.02f));
@@ -1014,7 +1062,7 @@ void applicationLoop() {
 		box.setProjectionMatrix(projection);
 		box.setViewMatrix(view);
 		box.render(matrixs17);
-		
+
 		//CABALLO 8 
 		glm::mat4  matrix19 = glm::translate(matrixs4, glm::vec3(-0.2f, 5.0f, 0.05f)); //TUBO 1
 		//matrixs = glm::rotate(matrixs3, 0.001f, glm::vec3(0.0f, 0.1f, 0.0f));
@@ -1078,14 +1126,14 @@ void applicationLoop() {
 		cylinder.setProjectionMatrix(projection);
 		cylinder.setViewMatrix(view);
 		cylinder.render(matrix22);
-		glm::mat4  matrixs21 = glm::translate(matrix22 ,glm::vec3(0.0f, 0.05f, -0.05f)); //caballo 1
-		matrixs21= glm::scale(matrixs21, glm::vec3(0.6f, 0.3f, 3.0f));
+		glm::mat4  matrixs21 = glm::translate(matrix22, glm::vec3(0.0f, 0.05f, -0.05f)); //caballo 1
+		matrixs21 = glm::scale(matrixs21, glm::vec3(0.6f, 0.3f, 3.0f));
 		glBindTexture(GL_TEXTURE_2D, textureID10);
 		box.setShader(&shaderLighting);
 		box.setProjectionMatrix(projection);
 		box.setViewMatrix(view);
 		box.render(matrixs21);
-		
+
 
 		//CARRUAJE 3
 		glm::mat4  matrix23 = glm::translate(matrixs4, glm::vec3(0.03, 5.0f, -0.22f)); //TUBO 2
@@ -1135,7 +1183,7 @@ void applicationLoop() {
 		box.setProjectionMatrix(projection);
 		box.setViewMatrix(view);
 		box.render(matrixs24);
-	
+
 		//Carruaje
 		glm::mat4  matrix26 = glm::translate(matrixs4, glm::vec3(0.13, 5.0f, -0.1f)); //TUBO 2
 		matrix26 = glm::scale(matrix26, glm::vec3(0.02f, 6.5f, 0.02f));
@@ -1151,7 +1199,7 @@ void applicationLoop() {
 		box.setProjectionMatrix(projection);
 		box.setViewMatrix(view);
 		box.render(matrixs25);
-	
+
 		//disco de puntos superior 
 
 		glm::mat4  matrixs26 = glm::translate(matrixs4, glm::vec3(0.0f, 14.0f, 0.0f));  //BASE MEDIA 
@@ -1163,14 +1211,71 @@ void applicationLoop() {
 		cylinder.render(matrixs26);
 
 
+		/* Carritos chocones */
+		/* Carritos chocones */
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, plataformaCCH);
+		baseCCH.setShader(&shaderLighting);
+		baseCCH.setProjectionMatrix(projection);
+		baseCCH.setViewMatrix(view);
+		baseCCH.setPosition(glm::vec3(25.0, 1.1001, -10.0));
+		baseCCH.setScale(glm::vec3(25.0f, 2.0f, 20.0f));
+		baseCCH.render();
+
+		baseCCH.setPosition(glm::vec3(25.0, 10.1001, -10.0));
+		baseCCH.setScale(glm::vec3(30.0f, 0.5f, 25.0f));
+		baseCCH.render();
+
+		/* Escalones */
+		baseCCH.setPosition(glm::vec3(12.5f, 1.5f, -10.0f));
+		baseCCH.setScale(glm::vec3(1.0f, 0.75f, 4.0f));
+		baseCCH.render();
+
+		baseCCH.setPosition(glm::vec3(12.5f, 0.75f, -10.0f));
+		baseCCH.setScale(glm::vec3(2.0f, 0.75f, 5.0f));
+		baseCCH.render();
+
+		baseCCH.setPosition(glm::vec3(12.5f, 0.0f, -10.0f));
+		baseCCH.setScale(glm::vec3(3.0f, 0.75f, 7.0f));
+		baseCCH.render();
+
+		/* Columnas*/
+		columnasCCH.setShader(&shaderMateriales);
+		columnasCCH.setProjectionMatrix(projection);
+		columnasCCH.setViewMatrix(view);
+		columnasCCH.setPosition(glm::vec3(37.0f, 5.101f, -19.5f));
+		columnasCCH.setScale(glm::vec3(0.5f, 10.0f, 0.5f));
+		columnasCCH.render();
+
+		columnasCCH.setPosition(glm::vec3(37.0f, 5.101f, -0.5f));
+		columnasCCH.setScale(glm::vec3(0.5f, 10.0f, 0.5f));
+		columnasCCH.render();
+
+		columnasCCH.setPosition(glm::vec3(13.0f, 5.101f, -19.5f));
+		columnasCCH.setScale(glm::vec3(0.3f, 10.0f, 0.3f));
+		columnasCCH.render();
+
+		columnasCCH.setPosition(glm::vec3(13.0f, 5.101f, -0.5f));
+		columnasCCH.setScale(glm::vec3(0.3f, 10.0f, 0.3f));
+		columnasCCH.render();
+
+		/* Autos
+		carro.setShader(&shaderTexture);
+		carro.setProjectionMatrix(projection);
+		carro.setViewMatrix(view);
+		carro.setPosition(glm::vec3(25.0, 1.1001, -10.0));
+		carro.setScale(glm::vec3(0.5, 0.5, 0.5));
+		carro.render(); */
 
 
-	
-/*------------				MANEJO DE LA ILUMINACION			-------------------
 
-Se manejan los eventos para mover izquierda, dercha , acercar y alejar.
 
-*/
+
+		/*------------				MANEJO DE LA ILUMINACION			-------------------
+
+		Se manejan los eventos para mover izquierda, dercha , acercar y alejar.
+
+		*/
 		shaderLighting.turnOn();
 		glUniform3fv(shaderLighting.getUniformLocation("viewPos"), 1, glm::value_ptr(camera->getPosition()));
 		//Directional light
@@ -1221,6 +1326,64 @@ Se manejan los eventos para mover izquierda, dercha , acercar y alejar.
 		way.setPosition(glm::vec3(0.0f, -0.699f, 27.0f));
 		way.setScale(glm::vec3(20.0f, 0.0f, 2.0f));
 		way.render();
+
+		/* Dibujo de arboles  */
+		arbol.setShader(&shaderLighting);
+		arbol.setProjectionMatrix(projection);
+		arbol.setViewMatrix(view);
+		arbol.setPosition(glm::vec3(-10.0f, -0.7f, 30.0f));
+		arbol.setScale(glm::vec3(1.0f, 1.0f, 1.0f));
+		arbol.render();
+
+		arbol.setPosition(glm::vec3(5.0f, -0.7f, 25.0f));
+		arbol.render();
+		arbol.setPosition(glm::vec3(25.0f, -0.7f, 25.0f));
+		arbol.render();
+		arbol.setPosition(glm::vec3(35.0f, -0.7f, 10.0f));
+		arbol.render();
+		arbol.setPosition(glm::vec3(-25.0f, -0.7f, -30.0f));
+		arbol.render();
+		arbol.setPosition(glm::vec3(-32.0f, -0.7f, 0.0f));
+		arbol.render();
+
+
+		/* Entrada (fence) */
+		fence.setShader(&shaderLighting);
+		fence.setProjectionMatrix(projection);
+		fence.setViewMatrix(view);
+		fence.setPosition(glm::vec3(10.0, 0.9, 40.0));
+		fence.setScale(glm::vec3(0.022f, 0.01f, 0.01f));
+		fence.render();
+
+		fence.setPosition(glm::vec3(20.0, 0.9, 40.0));
+		fence.render();
+		fence.setPosition(glm::vec3(30.0, 0.9, 40.0));
+		fence.render();
+
+
+		fence.setPosition(glm::vec3(-10.0, 0.9, 40.0));
+		fence.render();
+		fence.setPosition(glm::vec3(-20.0, 0.9, 40.0));
+		fence.render();
+		fence.setPosition(glm::vec3(-30.0, 0.9, 40.0));
+		fence.render();
+
+		/* Detras*/
+
+		fence.setPosition(glm::vec3(10.0, 0.9, -40.0));
+		fence.render();
+		fence.setPosition(glm::vec3(20.0, 0.9, -40.0));
+		fence.render();
+		fence.setPosition(glm::vec3(30.0, 0.9, -40.0));
+		fence.render();
+
+		fence.setPosition(glm::vec3(-10.0, 0.9, -40.0));
+		fence.render();
+		fence.setPosition(glm::vec3(-20.0, 0.9, -40.0));
+		fence.render();
+		fence.setPosition(glm::vec3(-30.0, 0.9, -40.0));
+		fence.render();
+
 	
 
 
