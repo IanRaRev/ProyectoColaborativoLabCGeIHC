@@ -59,7 +59,9 @@ Shader shaderLighting; // contiene todas las luces
 /* M O D E L O S */
 /* Ambiente*/
 Model arbol;
-Model fence;
+Model fence; 
+Model Wheel;
+Model Carro;
 
 GLuint textureID1, textureID2, textureID3,textureID4,
 textureID5,textureID6, textureID7, textureID8, 
@@ -72,7 +74,7 @@ textureID25, textureID26, textureCubeTexture;
 GLuint cubeTextureID;
 /* Texturas ambiente */
 GLuint textureCespedID, Camino;
-GLuint plataformaCCH;
+GLuint plataformaCCH, columsCCH;
 
 GLenum types[6] = {
 	GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -204,7 +206,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	baseCCH.init();
 	columnasCCH.init();
 
-	camera->setPosition(glm::vec3(0.0f, 0.0f, 45.0f));
+	camera->setPosition(glm::vec3(0.0f, 0.0f, 20.0f));
 
 	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
 
@@ -213,6 +215,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	/* Ambiente */
 	arbol.loadModel("../../models/Tree/Tree.obj");
 	fence.loadModel("../../models/fence01_obj/fence01.obj");
+	Wheel.loadModel("../../models/RuedaFortuna/RuedaFortuna.obj");
+	Carro.loadModel("../../models/car/future_car_6_FINAL(1).obj");
 
 	/*
 	//-------TEXTURAS----------------------------
@@ -271,6 +275,25 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	data = texture.convertToData(bitmap, imageWidth, imageHeight);
 	glGenTextures(1, &plataformaCCH);
 	glBindTexture(GL_TEXTURE_2D, plataformaCCH);
+	// set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (data) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+		std::cout << "Failed to load texture" << std::endl;
+	texture.freeImage(bitmap);
+
+	texture = Texture("../../Textures/metal.jpg");
+	bitmap = texture.loadImage(false);
+	data = texture.convertToData(bitmap, imageWidth, imageHeight);
+	glGenTextures(1, &columsCCH);
+	glBindTexture(GL_TEXTURE_2D, columsCCH);
 	// set the texture wrapping parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -699,6 +722,18 @@ void applicationLoop() {
 	glm::vec3 objPosition = glm::vec3(0.0f, 0.0f, -3.0f);
 	float angle = 0.0;
 	float ratio = 20.0;
+
+	float CarroZ = 0.0;
+	float CarroX = 0.0;
+	bool directionAirCraft = true;
+	bool directionAirCraft1 = false;
+	bool directionAirCraft2 = false;
+	bool directionAirCraft3 = false;
+	float rotationCarro1 = glm::radians(90.0f);
+	int finishRotation = 1;
+	bool finishRotation1 = false;
+	bool finishRotation2 = false;
+	bool finishRotation3 = false;
 
 	while (psi) {
 		psi = processInput(true);
@@ -1212,23 +1247,24 @@ void applicationLoop() {
 
 
 		/* Carritos chocones */
-		/* Carritos chocones */
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, plataformaCCH);
 		baseCCH.setShader(&shaderLighting);
 		baseCCH.setProjectionMatrix(projection);
 		baseCCH.setViewMatrix(view);
-		baseCCH.setPosition(glm::vec3(25.0, 1.1001, -10.0));
-		baseCCH.setScale(glm::vec3(25.0f, 2.0f, 20.0f));
+		baseCCH.setPosition(glm::vec3(5.0, -0.699, 5.0));
+		baseCCH.setScale(glm::vec3(5.0f, 0.5f, 5.0f));
+		baseCCH.render();
+		/*Techo */
+		baseCCH.setPosition(glm::vec3(5.0f, 2.699f, 5.0f));
+		baseCCH.setScale(glm::vec3(6.0f, 0.5f, 6.0f));
 		baseCCH.render();
 
-		baseCCH.setPosition(glm::vec3(25.0, 10.1001, -10.0));
-		baseCCH.setScale(glm::vec3(30.0f, 0.5f, 25.0f));
-		baseCCH.render();
 
-		/* Escalones */
-		baseCCH.setPosition(glm::vec3(12.5f, 1.5f, -10.0f));
-		baseCCH.setScale(glm::vec3(1.0f, 0.75f, 4.0f));
+
+		/* Escalones 
+		baseCCH.setPosition(glm::vec3(12.5f, -0.699f, -10.0f));
+		baseCCH.setScale(glm::vec3(1.0f, 0.2f, 4.0f));
 		baseCCH.render();
 
 		baseCCH.setPosition(glm::vec3(12.5f, 0.75f, -10.0f));
@@ -1237,37 +1273,140 @@ void applicationLoop() {
 
 		baseCCH.setPosition(glm::vec3(12.5f, 0.0f, -10.0f));
 		baseCCH.setScale(glm::vec3(3.0f, 0.75f, 7.0f));
-		baseCCH.render();
+		baseCCH.render(); */
 
 		/* Columnas*/
-		columnasCCH.setShader(&shaderMateriales);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, columsCCH);
+		columnasCCH.setShader(&shaderLighting);
 		columnasCCH.setProjectionMatrix(projection);
 		columnasCCH.setViewMatrix(view);
-		columnasCCH.setPosition(glm::vec3(37.0f, 5.101f, -19.5f));
-		columnasCCH.setScale(glm::vec3(0.5f, 10.0f, 0.5f));
+		columnasCCH.setPosition(glm::vec3(2.55f, 0.7f, 7.45f));
+		columnasCCH.setScale(glm::vec3(0.1f, 4.0f, 0.1f));
+		columnasCCH.render();
+		
+		columnasCCH.setPosition(glm::vec3(7.45f, 0.7f, 7.4f));
+		columnasCCH.setScale(glm::vec3(0.1f, 4.0f, 0.1f));
 		columnasCCH.render();
 
-		columnasCCH.setPosition(glm::vec3(37.0f, 5.101f, -0.5f));
-		columnasCCH.setScale(glm::vec3(0.5f, 10.0f, 0.5f));
+		columnasCCH.setPosition(glm::vec3(2.55f, 0.7f, 2.55f));
+		columnasCCH.setScale(glm::vec3(0.1f, 4.0f, 0.1f));
 		columnasCCH.render();
 
-		columnasCCH.setPosition(glm::vec3(13.0f, 5.101f, -19.5f));
-		columnasCCH.setScale(glm::vec3(0.3f, 10.0f, 0.3f));
+		columnasCCH.setPosition(glm::vec3(7.45f, 0.7f, 2.55f));
+		columnasCCH.setScale(glm::vec3(0.1f, 4.0f, 0.1f));
 		columnasCCH.render();
 
-		columnasCCH.setPosition(glm::vec3(13.0f, 5.101f, -0.5f));
-		columnasCCH.setScale(glm::vec3(0.3f, 10.0f, 0.3f));
-		columnasCCH.render();
 
-		/* Autos
-		carro.setShader(&shaderTexture);
-		carro.setProjectionMatrix(projection);
-		carro.setViewMatrix(view);
-		carro.setPosition(glm::vec3(25.0, 1.1001, -10.0));
-		carro.setScale(glm::vec3(0.5, 0.5, 0.5));
-		carro.render(); */
+		Carro.setShader(&shaderLighting);
+		Carro.setProjectionMatrix(projection);
+		Carro.setViewMatrix(view);
+		Carro.setScale(glm::vec3(0.15f, 0.15f, 0.15f));
 
 
+		/* Movimientos del modelo. Desplazamiento en eje Z */
+		glm::mat4 matrixCarro1 = glm::translate(glm::mat4(1.0f), glm::vec3(CarroX, 0.0, CarroZ));
+		matrixCarro1 = glm::translate(matrixCarro1, glm::vec3(3.0f, -0.4, 7.0));
+		//matrixCarro1 = glm::rotate(matrixCarro1, rotationCarro1, glm::vec3(0, -1, 0));
+		Carro.render(matrixCarro1); 
+
+		/* Animación carro 1*/
+		/* Animación por máquina de estados
+		if (finishRotation == 1)
+		{
+			CarroZ -= 0.5;
+			if (finishRotation == 1 && CarroZ < -4.0)
+			{
+				CarroZ = -4.0;
+				finishRotation = 2;
+			}
+
+		} 
+
+		/*else if (finishRotation == 2)
+		{
+			CarroX -= 0.5;
+			if (finishRotation == 2 && CarroX < -4.0)
+			{
+				CarroX = -4.0;
+				finishRotation = 3;
+			}
+			else
+			{
+				rotationCarro1 += 0.1;
+				if (rotationCarro1 > glm::radians(90.0f))
+				{
+					rotationCarro1 = glm::radians(90.0f);
+				}
+			}
+		}*/
+
+		
+		/*else if (finishRotation ==  3)
+		{
+			CarroZ += 0.5;
+			if (finishRotation == 3 && CarroZ > 0.0)
+			{
+				CarroZ = 0.0;
+				finishRotation = 4;
+			}
+			else
+			{
+				rotationCarro1 += 0.1;
+				if (rotationCarro1 > glm::radians(180.0f))
+				{
+					rotationCarro1 = glm::radians(180.0f);
+				}
+			}
+		} */
+
+		/*else if (finishRotation == 4)
+		{
+			CarroX += 0.5;
+			if (finishRotation == 4 && CarroX > 0.0)
+			{
+				CarroX = 0.0;
+				finishRotation = 1;
+			}
+			else
+			{
+				rotationCarro1 += 0.1;
+				if (rotationCarro1 > glm::radians(270.0f))
+				{
+					rotationCarro1 = glm::radians(270.0f);
+				}
+			}
+		}
+
+		rotationCarro1 += 0.1;
+		if (rotationCarro1 > glm::radians(360.0f))
+		{
+			rotationCarro1 = glm::radians(360.0f);
+		}*/
+			
+		/* Autos 
+		Carro.setShader(&shaderTexture);
+		Carro.setProjectionMatrix(projection);
+		Carro.setViewMatrix(view);
+		Carro.setPosition(glm::vec3(3.0f, -0.4f, 3.0f));
+		Carro.setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		Carro.render();
+
+		/* Autos 
+		Carro.setShader(&shaderTexture);
+		Carro.setProjectionMatrix(projection);
+		Carro.setViewMatrix(view);
+		Carro.setPosition(glm::vec3(6.0f, -0.4f, 6.0f));
+		Carro.setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		Carro.render(); */
+
+		/* Rueda de la Fortuna */
+		Wheel.setShader(&shaderLighting);
+		Wheel.setProjectionMatrix(projection);
+		Wheel.setViewMatrix(view);
+		Wheel.setPosition(glm::vec3(-10.0f, -0.7f, -10.0f));
+		Wheel.setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		Wheel.render();
 
 
 
@@ -1300,7 +1439,6 @@ void applicationLoop() {
 		shaderLighting.turnOff();
 
 
-
 		/* AMBIENTE */
 
 		/* Suelo */
@@ -1310,7 +1448,8 @@ void applicationLoop() {
 		Suelo.setProjectionMatrix(projection);
 		Suelo.setViewMatrix(view);
 		Suelo.setPosition(glm::vec3(0.0f, -0.7f, 0.0f));
-		Suelo.setScale(glm::vec3(90.0f, 0.001f, 90.0f));
+		/* (x, y, z)*/
+		Suelo.setScale(glm::vec3(40.0f, 0.001f, 40.0f));
 		Suelo.render();
 
 		/* Camino */
@@ -1320,68 +1459,104 @@ void applicationLoop() {
 		way.setProjectionMatrix(projection);
 		way.setViewMatrix(view);
 		way.setPosition(glm::vec3(0.0f, -0.699f, 0.0f));
-		way.setScale(glm::vec3(2.0f, 0.0f, 85.0f));
+		way.setScale(glm::vec3(1.0f, 0.0f, 35.0f));
 		way.render();
 
-		way.setPosition(glm::vec3(0.0f, -0.699f, 27.0f));
-		way.setScale(glm::vec3(20.0f, 0.0f, 2.0f));
+		way.setPosition(glm::vec3(0.0f, -0.699f, 0.0f));
+		way.setScale(glm::vec3(30.0f, 0.0f, 1.0f));
 		way.render();
 
+		way.setPosition(glm::vec3(0.0f, -0.699f, 10.0f));
+		way.setScale(glm::vec3(20.0f, 0.0f, 1.0f));
+		way.render();
 		/* Dibujo de arboles  */
 		arbol.setShader(&shaderLighting);
 		arbol.setProjectionMatrix(projection);
 		arbol.setViewMatrix(view);
-		arbol.setPosition(glm::vec3(-10.0f, -0.7f, 30.0f));
-		arbol.setScale(glm::vec3(1.0f, 1.0f, 1.0f));
+		arbol.setPosition(glm::vec3(-10.0f, -0.7f, 15.0f));
+		arbol.setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 		arbol.render();
-
-		arbol.setPosition(glm::vec3(5.0f, -0.7f, 25.0f));
+		
+		arbol.setPosition(glm::vec3(5.0f, -0.7f, 11.0f));
 		arbol.render();
-		arbol.setPosition(glm::vec3(25.0f, -0.7f, 25.0f));
+		arbol.setPosition(glm::vec3(8.0f, -0.7f, 2.0f));
 		arbol.render();
-		arbol.setPosition(glm::vec3(35.0f, -0.7f, 10.0f));
+		arbol.setPosition(glm::vec3(-5.0f, -0.7f, 10.0f));
 		arbol.render();
-		arbol.setPosition(glm::vec3(-25.0f, -0.7f, -30.0f));
+		arbol.setPosition(glm::vec3(-16.0f, -0.7f, -12.0f));
 		arbol.render();
-		arbol.setPosition(glm::vec3(-32.0f, -0.7f, 0.0f));
+		arbol.setPosition(glm::vec3(-11.0f, -0.7f, 0.0f));
 		arbol.render();
 
 
 		/* Entrada (fence) */
-		fence.setShader(&shaderLighting);
+		fence.setShader(&shaderTexture);
 		fence.setProjectionMatrix(projection);
 		fence.setViewMatrix(view);
-		fence.setPosition(glm::vec3(10.0, 0.9, 40.0));
-		fence.setScale(glm::vec3(0.022f, 0.01f, 0.01f));
+		fence.setPosition(glm::vec3(3.0f, -0.1f, 18.0f));
+		fence.setScale(glm::vec3(0.0065f, 0.0065f, 0.0065f));
+		fence.render(); 
+
+		fence.setPosition(glm::vec3(5.5f, -0.1f, 18.0));
+		fence.render();
+		fence.setPosition(glm::vec3(8.0f, -0.1f, 18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(9.5f, -0.1f, 18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(12.0f, -0.1f, 18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(14.5f, -0.1f, 18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(17.0f, -0.1f, 18.0f));
 		fence.render();
 
-		fence.setPosition(glm::vec3(20.0, 0.9, 40.0));
+		fence.setPosition(glm::vec3(-3.0, -0.1, 18.0));
 		fence.render();
-		fence.setPosition(glm::vec3(30.0, 0.9, 40.0));
+		fence.setPosition(glm::vec3(-5.5f, -0.1f, 18.0));
 		fence.render();
-
-
-		fence.setPosition(glm::vec3(-10.0, 0.9, 40.0));
+		fence.setPosition(glm::vec3(-8.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-20.0, 0.9, 40.0));
+		fence.setPosition(glm::vec3(-9.5f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-30.0, 0.9, 40.0));
+		fence.setPosition(glm::vec3(-12.0f, -0.1f, 18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(-14.5f, -0.1f, 18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(-17.0f, -0.1f, 18.0f));
 		fence.render();
 
 		/* Detras*/
 
-		fence.setPosition(glm::vec3(10.0, 0.9, -40.0));
-		fence.render();
-		fence.setPosition(glm::vec3(20.0, 0.9, -40.0));
-		fence.render();
-		fence.setPosition(glm::vec3(30.0, 0.9, -40.0));
+		fence.setPosition(glm::vec3(3.0f, -0.1f, 18.0f));
+		fence.setScale(glm::vec3(0.0065f, 0.0065f, 0.0065f));
 		fence.render();
 
-		fence.setPosition(glm::vec3(-10.0, 0.9, -40.0));
+		fence.setPosition(glm::vec3(5.5f, -0.1f, -18.0));
 		fence.render();
-		fence.setPosition(glm::vec3(-20.0, 0.9, -40.0));
+		fence.setPosition(glm::vec3(8.0f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-30.0, 0.9, -40.0));
+		fence.setPosition(glm::vec3(9.5f, -0.1f, -18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(12.0f, -0.1f, -18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(14.5f, -0.1f, -18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(17.0f, -0.1f, -18.0f));
+		fence.render();
+
+		fence.setPosition(glm::vec3(-3.0, -0.1, -18.0));
+		fence.render();
+		fence.setPosition(glm::vec3(-5.5f, -0.1f, -18.0));
+		fence.render();
+		fence.setPosition(glm::vec3(-8.0f, -0.1f, -18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(-9.5f, -0.1f, -18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(-12.0f, -0.1f, -18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(-14.5f, -0.1f, -18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(-17.0f, -0.1f, -18.0f));
 		fence.render();
 
 	
