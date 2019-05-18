@@ -62,7 +62,7 @@ Model arbol;
 Model fence; 
 Model Carro;
 Model Carro2;
-
+Model Carro3;
 /* Rueda de la fortuna */
 Model Wheel;
 
@@ -220,15 +220,19 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	camera->setPosition(glm::vec3(posX, posY, posZ));
 
 	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
+	way.scaleUVS(glm::vec2(2.0, 100.0));
 
 
 	/*  M O D E L O S */
 	/* Ambiente */
 	arbol.loadModel("../../models/Tree/Tree.obj");
 	fence.loadModel("../../models/fence01_obj/fence01.obj");
+	/* Rueda de la fortuna */
 	Wheel.loadModel("../../models/RuedaFortuna/RuedaFortuna.obj");
+	/* Carros chocones */
 	Carro.loadModel("../../models/car/future_car_6_FINAL(1).obj");
 	Carro2.loadModel("../../models/ToonCar/toon_car (1).obj");
+	Carro3.loadModel("../../models/Car3/Flying Charger.obj");
 
 	/*
 	//-------TEXTURAS----------------------------
@@ -729,8 +733,8 @@ bool processInput(bool continueApplication) {
 	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
 	{
 		posX = 0.0;
-		posY = 40.0f;
-		posZ = 0.0;
+		posY = 0.0f;
+		posZ = 20.0;
 		camera->setPosition(glm::vec3(posX, posY, posZ));
 	}
 		
@@ -765,6 +769,12 @@ void applicationLoop() {
 	float rotationAirCraft1 = 0.0;
 	int finishRotation1 = 1;
 	bool directionAirCraft1 = true;
+
+	float aircraftZ2 = 0.0;
+	float aircraftX2 = 0.0;
+	float rotationAirCraft2 = 0.0;
+	int finishRotation2 = 1;
+	bool directionAirCraft2 = true;
 
 	while (psi) {
 		psi = processInput(true);
@@ -1333,17 +1343,35 @@ void applicationLoop() {
 		Carro.setProjectionMatrix(projection);
 		Carro.setViewMatrix(view);
 		Carro.setScale(glm::vec3(0.15f, 0.15f, 0.15f));
-
-
 		/* Movimientos del modelo. Desplazamiento en eje Z */
 		glm::mat4 matrixAirCraft = glm::translate(glm::mat4(1.0f), glm::vec3(aircraftX, 0.0, aircraftZ));
-		matrixAirCraft = glm::translate(matrixAirCraft, glm::vec3(3.0f, -0.4, 7.0));
+		matrixAirCraft = glm::translate(matrixAirCraft, glm::vec3(3.0f, -0.45f, 7.0f));
 		matrixAirCraft = glm::rotate(matrixAirCraft, rotationAirCraft, glm::vec3(0, 1, 0));
 		Carro.render(matrixAirCraft);
 
+		Carro2.setShader(&shaderLighting);
+		Carro2.setProjectionMatrix(projection);
+		Carro2.setViewMatrix(view);
+		Carro2.setScale(glm::vec3(0.002f, 0.002f, 0.002f));
+		/* Movimientos del modelo. Desplazamiento en eje Z */
+		glm::mat4 matrixAirCraft1 = glm::translate(glm::mat4(1.0f), glm::vec3(aircraftX1, 0.0, aircraftZ1));
+		matrixAirCraft1 = glm::translate(matrixAirCraft1, glm::vec3(5.0f, -0.45f, 3.0f));
+		matrixAirCraft1 = glm::rotate(matrixAirCraft1, rotationAirCraft1, glm::vec3(0, 1, 0));
+		Carro2.render(matrixAirCraft1);
+
+		Carro3.setShader(&shaderLighting);
+		Carro3.setProjectionMatrix(projection);
+		Carro3.setViewMatrix(view);
+		Carro3.setScale(glm::vec3(10.0f, 10.0f, 10.0f));
+		/* Movimientos del modelo. Desplazamiento en eje Z */
+		glm::mat4 matrixAirCraft2 = glm::translate(glm::mat4(1.0f), glm::vec3(aircraftX2, 0.0, aircraftZ2));
+		matrixAirCraft2 = glm::translate(matrixAirCraft2, glm::vec3(5.0f, -0.4f, 3.0f));
+		matrixAirCraft2 = glm::rotate(matrixAirCraft2, rotationAirCraft2, glm::vec3(0, 1, 0));
+		Carro3.render(matrixAirCraft2); 
+
 		if (animation1)
 		{
-
+			/* Animación carro1 */
 			if (finishRotation == 1)
 			{
 				aircraftX += 0.1;
@@ -1354,11 +1382,10 @@ void applicationLoop() {
 				}
 
 			} /* :)*/
-
 			else if (finishRotation == 2)
 			{
-				aircraftZ = -0.1;
-				if (finishRotation == 2 && aircraftZ > -4.0)
+				aircraftZ -= 0.1;
+				if (finishRotation == 2 && aircraftZ < -4.0)
 				{
 					aircraftZ = -4.0;
 					finishRotation = 3;
@@ -1372,8 +1399,6 @@ void applicationLoop() {
 					}
 				}
 			}
-
-
 			else if (finishRotation == 3)
 			{
 				aircraftX -= 0.1;
@@ -1390,8 +1415,7 @@ void applicationLoop() {
 						rotationAirCraft = glm::radians(180.0f);
 					}
 				}
-			}
-
+			}	
 			else if (finishRotation == 4)
 			{
 				aircraftZ += 0.1;
@@ -1416,67 +1440,50 @@ void applicationLoop() {
 				rotationAirCraft = glm::radians(360.0f);
 			}
 
-			/*
+			
+			/* Animación carro 2*/
 			if (finishRotation1)
 			{
-				if (directionAirCraft1) aircraftZ1 -= 0.2;
+				if (directionAirCraft1) 
+					aircraftZ1 += 0.015;
 
-				else aircraftZ1 += 0.2;
+				else 
+					aircraftZ1 -= 0.015;
 
-				if (directionAirCraft1 && aircraftZ1 < -6.0)
+				if (directionAirCraft1 && aircraftZ1 > 4.0)
 				{
 					directionAirCraft1 = false;
 					finishRotation1 = false;
-					aircraftZ = -6.0;
+					aircraftZ1 = 4.0;
 				}
-				if (!directionAirCraft && aircraftZ > 6.0)
+				if (!directionAirCraft1 && aircraftZ1 < 0.0)
 				{
-					directionAirCraft = true;
-					finishRotation = false;
-					aircraftZ = 6.0;
+					directionAirCraft1 = true;
+					finishRotation1 = false;
+					aircraftZ1 = 0.0;
 				}
 			}
 			else
 			{
-				rotationAirCraft += 0.2;
-				if (!directionAirCraft)
+				rotationAirCraft1 += 0.1;
+				if (!directionAirCraft1)
 				{
-					if (rotationAirCraft > glm::radians(180.0f))
+					if (rotationAirCraft1 > glm::radians(180.0f))
 					{
-						finishRotation = true;
-						rotationAirCraft = glm::radians(180.0f);
+						finishRotation1 = true;
+						rotationAirCraft1 = glm::radians(180.0f);
 					}
 				}
 				else
 				{
-					if (rotationAirCraft > glm::radians(360.0f))
+					if (rotationAirCraft1 > glm::radians(360.0f))
 					{
-						finishRotation = true;
-						rotationAirCraft = glm::radians(0.0f);
+						finishRotation1 = true;
+						rotationAirCraft1 = glm::radians(0.0f);
 					}
 				}
 			}
-		}*/
 		}
-
-		Carro2.setShader(&shaderLighting);
-		Carro2.setProjectionMatrix(projection);
-		Carro2.setViewMatrix(view);
-		Carro2.setScale(glm::vec3(0.002f, 0.002f, 0.002f));
-		/* Movimientos del modelo. Desplazamiento en eje Z */
-		glm::mat4 matrixAirCraft1 = glm::translate(glm::mat4(1.0f), glm::vec3(aircraftX1, 0.0, aircraftZ1));
-		matrixAirCraft1 = glm::translate(matrixAirCraft1, glm::vec3(5.0f, -0.4, 5.0));
-		matrixAirCraft1 = glm::rotate(matrixAirCraft1, rotationAirCraft1, glm::vec3(0, 1, 0));
-		Carro2.render(matrixAirCraft1);
-
-
-		/* Autos 
-		Carro.setShader(&shaderTexture);
-		Carro.setProjectionMatrix(projection);
-		Carro.setViewMatrix(view);
-		Carro.setPosition(glm::vec3(6.0f, -0.4f, 6.0f));
-		Carro.setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		Carro.render(); */
 
 		/* Rueda de la Fortuna */
 		Wheel.setShader(&shaderLighting);
