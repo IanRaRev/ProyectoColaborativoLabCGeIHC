@@ -60,8 +60,11 @@ Shader shaderLighting; // contiene todas las luces
 /* Ambiente*/
 Model arbol;
 Model fence; 
-Model Wheel;
 Model Carro;
+Model Carro2;
+
+/* Rueda de la fortuna */
+Model Wheel;
 
 GLuint textureID1, textureID2, textureID3,textureID4,
 textureID5,textureID6, textureID7, textureID8, 
@@ -75,6 +78,14 @@ GLuint cubeTextureID;
 /* Texturas ambiente */
 GLuint textureCespedID, Camino;
 GLuint plataformaCCH, columsCCH;
+
+/* Camara */
+float posX, posY;
+float posZ = 20.0;
+/* Animaciones */
+bool animation1 = false;
+bool animation2 = false;
+
 
 GLenum types[6] = {
 	GL_TEXTURE_CUBE_MAP_POSITIVE_X,
@@ -206,7 +217,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	baseCCH.init();
 	columnasCCH.init();
 
-	camera->setPosition(glm::vec3(0.0f, 0.0f, 20.0f));
+	camera->setPosition(glm::vec3(posX, posY, posZ));
 
 	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
 
@@ -217,6 +228,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	fence.loadModel("../../models/fence01_obj/fence01.obj");
 	Wheel.loadModel("../../models/RuedaFortuna/RuedaFortuna.obj");
 	Carro.loadModel("../../models/car/future_car_6_FINAL(1).obj");
+	Carro2.loadModel("../../models/ToonCar/toon_car (1).obj");
 
 	/*
 	//-------TEXTURAS----------------------------
@@ -697,11 +709,30 @@ bool processInput(bool continueApplication) {
 		camera->moveRightCamera(false, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera->moveRightCamera(true, deltaTime);
+
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 		rot1 += 0.03;
+
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
 		rot2 -= 0.03;
-		
+
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+		animation1 = true;
+
+	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+	{
+		posX = 0.0;
+		posY = 40.0f;
+		posZ = 0.0;
+		camera->setPosition(glm::vec3(posX, posY, posZ));
+	}
+	if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
+	{
+		posX = 0.0;
+		posY = 40.0f;
+		posZ = 0.0;
+		camera->setPosition(glm::vec3(posX, posY, posZ));
+	}
 		
 
 	glfwPollEvents();
@@ -723,17 +754,17 @@ void applicationLoop() {
 	float angle = 0.0;
 	float ratio = 20.0;
 
-	float CarroZ = 0.0;
-	float CarroX = 0.0;
+	float aircraftZ = 0.0;
+	float aircraftX = 0.0;
 	bool directionAirCraft = true;
-	bool directionAirCraft1 = false;
-	bool directionAirCraft2 = false;
-	bool directionAirCraft3 = false;
-	float rotationCarro1 = glm::radians(90.0f);
+	float rotationAirCraft = 0.0;
 	int finishRotation = 1;
-	bool finishRotation1 = false;
-	bool finishRotation2 = false;
-	bool finishRotation3 = false;
+
+	float aircraftZ1 = 0.0;
+	float aircraftX1 = 0.0;
+	float rotationAirCraft1 = 0.0;
+	int finishRotation1 = 1;
+	bool directionAirCraft1 = true;
 
 	while (psi) {
 		psi = processInput(true);
@@ -1305,92 +1336,139 @@ void applicationLoop() {
 
 
 		/* Movimientos del modelo. Desplazamiento en eje Z */
-		glm::mat4 matrixCarro1 = glm::translate(glm::mat4(1.0f), glm::vec3(CarroX, 0.0, CarroZ));
-		matrixCarro1 = glm::translate(matrixCarro1, glm::vec3(3.0f, -0.4, 7.0));
-		//matrixCarro1 = glm::rotate(matrixCarro1, rotationCarro1, glm::vec3(0, -1, 0));
-		Carro.render(matrixCarro1); 
+		glm::mat4 matrixAirCraft = glm::translate(glm::mat4(1.0f), glm::vec3(aircraftX, 0.0, aircraftZ));
+		matrixAirCraft = glm::translate(matrixAirCraft, glm::vec3(3.0f, -0.4, 7.0));
+		matrixAirCraft = glm::rotate(matrixAirCraft, rotationAirCraft, glm::vec3(0, 1, 0));
+		Carro.render(matrixAirCraft);
 
-		/* Animación carro 1*/
-		/* Animación por máquina de estados
-		if (finishRotation == 1)
+		if (animation1)
 		{
-			CarroZ -= 0.5;
-			if (finishRotation == 1 && CarroZ < -4.0)
+
+			if (finishRotation == 1)
 			{
-				CarroZ = -4.0;
-				finishRotation = 2;
+				aircraftX += 0.1;
+				if (finishRotation == 1 && aircraftX > 4.0)
+				{
+					aircraftX = 4.0;
+					finishRotation = 2;
+				}
+
+			} /* :)*/
+
+			else if (finishRotation == 2)
+			{
+				aircraftZ = -0.1;
+				if (finishRotation == 2 && aircraftZ > -4.0)
+				{
+					aircraftZ = -4.0;
+					finishRotation = 3;
+				}
+				else
+				{
+					rotationAirCraft += 0.1;
+					if (rotationAirCraft > glm::radians(90.0f))
+					{
+						rotationAirCraft = glm::radians(90.0f);
+					}
+				}
 			}
 
-		} 
 
-		/*else if (finishRotation == 2)
-		{
-			CarroX -= 0.5;
-			if (finishRotation == 2 && CarroX < -4.0)
+			else if (finishRotation == 3)
 			{
-				CarroX = -4.0;
-				finishRotation = 3;
+				aircraftX -= 0.1;
+				if (finishRotation == 3 && aircraftX < 0.0)
+				{
+					aircraftX = 0.0;
+					finishRotation = 4;
+				}
+				else
+				{
+					rotationAirCraft += 0.1;
+					if (rotationAirCraft > glm::radians(180.0f))
+					{
+						rotationAirCraft = glm::radians(180.0f);
+					}
+				}
+			}
+
+			else if (finishRotation == 4)
+			{
+				aircraftZ += 0.1;
+				if (finishRotation == 4 && aircraftZ > 0.0)
+				{
+					aircraftZ = 0.0;
+					finishRotation = 1;
+				}
+				else
+				{
+					rotationAirCraft += 0.1;
+					if (rotationAirCraft > glm::radians(270.0f))
+					{
+						rotationAirCraft = glm::radians(270.0f);
+					}
+				}
+			}
+
+			rotationAirCraft += 0.1;
+			if (rotationAirCraft > glm::radians(360.0f))
+			{
+				rotationAirCraft = glm::radians(360.0f);
+			}
+
+			/*
+			if (finishRotation1)
+			{
+				if (directionAirCraft1) aircraftZ1 -= 0.2;
+
+				else aircraftZ1 += 0.2;
+
+				if (directionAirCraft1 && aircraftZ1 < -6.0)
+				{
+					directionAirCraft1 = false;
+					finishRotation1 = false;
+					aircraftZ = -6.0;
+				}
+				if (!directionAirCraft && aircraftZ > 6.0)
+				{
+					directionAirCraft = true;
+					finishRotation = false;
+					aircraftZ = 6.0;
+				}
 			}
 			else
 			{
-				rotationCarro1 += 0.1;
-				if (rotationCarro1 > glm::radians(90.0f))
+				rotationAirCraft += 0.2;
+				if (!directionAirCraft)
 				{
-					rotationCarro1 = glm::radians(90.0f);
+					if (rotationAirCraft > glm::radians(180.0f))
+					{
+						finishRotation = true;
+						rotationAirCraft = glm::radians(180.0f);
+					}
+				}
+				else
+				{
+					if (rotationAirCraft > glm::radians(360.0f))
+					{
+						finishRotation = true;
+						rotationAirCraft = glm::radians(0.0f);
+					}
 				}
 			}
 		}*/
-
-		
-		/*else if (finishRotation ==  3)
-		{
-			CarroZ += 0.5;
-			if (finishRotation == 3 && CarroZ > 0.0)
-			{
-				CarroZ = 0.0;
-				finishRotation = 4;
-			}
-			else
-			{
-				rotationCarro1 += 0.1;
-				if (rotationCarro1 > glm::radians(180.0f))
-				{
-					rotationCarro1 = glm::radians(180.0f);
-				}
-			}
-		} */
-
-		/*else if (finishRotation == 4)
-		{
-			CarroX += 0.5;
-			if (finishRotation == 4 && CarroX > 0.0)
-			{
-				CarroX = 0.0;
-				finishRotation = 1;
-			}
-			else
-			{
-				rotationCarro1 += 0.1;
-				if (rotationCarro1 > glm::radians(270.0f))
-				{
-					rotationCarro1 = glm::radians(270.0f);
-				}
-			}
 		}
 
-		rotationCarro1 += 0.1;
-		if (rotationCarro1 > glm::radians(360.0f))
-		{
-			rotationCarro1 = glm::radians(360.0f);
-		}*/
-			
-		/* Autos 
-		Carro.setShader(&shaderTexture);
-		Carro.setProjectionMatrix(projection);
-		Carro.setViewMatrix(view);
-		Carro.setPosition(glm::vec3(3.0f, -0.4f, 3.0f));
-		Carro.setScale(glm::vec3(0.2f, 0.2f, 0.2f));
-		Carro.render();
+		Carro2.setShader(&shaderLighting);
+		Carro2.setProjectionMatrix(projection);
+		Carro2.setViewMatrix(view);
+		Carro2.setScale(glm::vec3(0.002f, 0.002f, 0.002f));
+		/* Movimientos del modelo. Desplazamiento en eje Z */
+		glm::mat4 matrixAirCraft1 = glm::translate(glm::mat4(1.0f), glm::vec3(aircraftX1, 0.0, aircraftZ1));
+		matrixAirCraft1 = glm::translate(matrixAirCraft1, glm::vec3(5.0f, -0.4, 5.0));
+		matrixAirCraft1 = glm::rotate(matrixAirCraft1, rotationAirCraft1, glm::vec3(0, 1, 0));
+		Carro2.render(matrixAirCraft1);
+
 
 		/* Autos 
 		Carro.setShader(&shaderTexture);
@@ -1404,8 +1482,8 @@ void applicationLoop() {
 		Wheel.setShader(&shaderLighting);
 		Wheel.setProjectionMatrix(projection);
 		Wheel.setViewMatrix(view);
-		Wheel.setPosition(glm::vec3(-10.0f, -0.7f, -10.0f));
-		Wheel.setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		Wheel.setPosition(glm::vec3(-10.0f, 4.0f, -10.0f));
+		Wheel.setScale(glm::vec3(0.4f, 0.4f, 0.4f));
 		Wheel.render();
 
 
