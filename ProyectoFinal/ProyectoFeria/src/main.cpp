@@ -39,7 +39,8 @@ Cylinder cylinder2(20, 20, 0.5, 0.5);
 Cylinder cylinder3(20, 20, 0.5, 0.5);
 Cylinder cylinder4(20, 20, 0.5, 0.5);
 Box box,box1,box2,box3,box4,box5,box6,box7;
-/*Carros chocones */
+/* Iluminación */
+Sphere sphereLuz(0.1, 0.1);
 /* Carros Chocones */
 Box baseCCH;
 Cylinder columnasCCH(20, 20, 0.5, 0.5);
@@ -207,6 +208,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	box5.init();
 	box6.init();
 	box7.init();
+
+	/* Luz */
+	sphereLuz.init();
 
 
 	/* Ambiente */
@@ -609,6 +613,9 @@ void destroy() {
 	box5.destroy();
 	box6.destroy();
 	box7.destroy();
+
+	/* Luces */
+	sphereLuz.destroy();
 
 	/* Ambiente */
 	Suelo.destroy();
@@ -1359,15 +1366,15 @@ void applicationLoop() {
 		matrixAirCraft1 = glm::rotate(matrixAirCraft1, rotationAirCraft1, glm::vec3(0, 1, 0));
 		Carro2.render(matrixAirCraft1);
 
-		Carro3.setShader(&shaderLighting);
+		/*Carro3.setShader(&shaderLighting);
 		Carro3.setProjectionMatrix(projection);
 		Carro3.setViewMatrix(view);
 		Carro3.setScale(glm::vec3(10.0f, 10.0f, 10.0f));
-		/* Movimientos del modelo. Desplazamiento en eje Z */
+		/* Movimientos del modelo. Desplazamiento en eje Z 
 		glm::mat4 matrixAirCraft2 = glm::translate(glm::mat4(1.0f), glm::vec3(aircraftX2, 0.0, aircraftZ2));
 		matrixAirCraft2 = glm::translate(matrixAirCraft2, glm::vec3(5.0f, -0.4f, 3.0f));
 		matrixAirCraft2 = glm::rotate(matrixAirCraft2, rotationAirCraft2, glm::vec3(0, 1, 0));
-		Carro3.render(matrixAirCraft2); 
+		Carro3.render(matrixAirCraft2); */
 
 		if (animation1)
 		{
@@ -1489,8 +1496,8 @@ void applicationLoop() {
 		Wheel.setShader(&shaderLighting);
 		Wheel.setProjectionMatrix(projection);
 		Wheel.setViewMatrix(view);
-		Wheel.setPosition(glm::vec3(-10.0f, 4.0f, -10.0f));
-		Wheel.setScale(glm::vec3(0.4f, 0.4f, 0.4f));
+		Wheel.setPosition(glm::vec3(-10.0f, 4.0f, 5.0f));
+		Wheel.setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 		Wheel.render();
 
 
@@ -1543,7 +1550,7 @@ void applicationLoop() {
 		way.setShader(&shaderTexture);
 		way.setProjectionMatrix(projection);
 		way.setViewMatrix(view);
-		way.setPosition(glm::vec3(0.0f, -0.699f, 0.0f));
+		way.setPosition(glm::vec3(1.0f, -0.699f, 0.0f));
 		way.setScale(glm::vec3(1.0f, 0.0f, 35.0f));
 		way.render();
 
@@ -1554,6 +1561,7 @@ void applicationLoop() {
 		way.setPosition(glm::vec3(0.0f, -0.699f, 10.0f));
 		way.setScale(glm::vec3(20.0f, 0.0f, 1.0f));
 		way.render();
+
 		/* Dibujo de arboles  */
 		arbol.setShader(&shaderLighting);
 		arbol.setProjectionMatrix(projection);
@@ -1566,7 +1574,7 @@ void applicationLoop() {
 		arbol.render();
 		arbol.setPosition(glm::vec3(8.0f, -0.7f, 2.0f));
 		arbol.render();
-		arbol.setPosition(glm::vec3(-5.0f, -0.7f, 10.0f));
+		arbol.setPosition(glm::vec3(-5.0f, -0.7f, 8.0f));
 		arbol.render();
 		arbol.setPosition(glm::vec3(-16.0f, -0.7f, -12.0f));
 		arbol.render();
@@ -1643,8 +1651,6 @@ void applicationLoop() {
 		fence.render();
 		fence.setPosition(glm::vec3(-17.0f, -0.1f, -18.0f));
 		fence.render();
-
-	
 
 
 		// Se Dibuja el Skybox
