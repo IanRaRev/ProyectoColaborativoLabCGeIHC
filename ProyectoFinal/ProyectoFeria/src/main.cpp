@@ -30,7 +30,11 @@
 
 #define ARRAY_SIZE_IN_ELEMENTS(a) (sizeof(a)/sizeof(a[0]))
 
+/* Camara primera persona */
 std::shared_ptr<FirstPersonCamera> camera(new FirstPersonCamera());
+/* Camara tercera persona (para juegos) */
+std::shared_ptr<FirstPersonCamera> camera3P(new FirstPersonCamera());
+
 
 Sphere sphere(20, 20);
 Sphere sphere2(20, 20);
@@ -61,6 +65,9 @@ Shader shaderLighting; // contiene todas las luces
 /* Ambiente*/
 Model arbol;
 Model fence; 
+Model gate;
+Model Lampara;
+/* Autos chocones */
 Model Carro;
 Model Carro2;
 Model Carro3;
@@ -83,6 +90,11 @@ GLuint plataformaCCH, columsCCH;
 /* Camara */
 float posX, posY;
 float posZ = 20.0;
+
+float posX3P, posY3P, posZ3P;
+
+bool ChangeCamera = true;
+
 /* Animaciones */
 bool animation1 = false;
 bool animation2 = false;
@@ -221,7 +233,11 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	baseCCH.init();
 	columnasCCH.init();
 
+	/* Cámaras manejadas en la ventana*/
+	/* Primera persona */
 	camera->setPosition(glm::vec3(posX, posY, posZ));
+	/* Cámara tercera persona */
+	camera3P->setPosition(glm::vec3(posX3P, posY3P, posZ3P));
 
 	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
 	way.scaleUVS(glm::vec2(2.0, 100.0));
@@ -237,6 +253,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	Carro.loadModel("../../models/car/future_car_6_FINAL(1).obj");
 	Carro2.loadModel("../../models/ToonCar/toon_car (1).obj");
 	Carro3.loadModel("../../models/Car3/Flying Charger.obj");
+	gate.loadModel("../../models/FBX/untitled.obj");
+	Lampara.loadModel("../../models/Lampara/untitled.obj");
+
 
 	/*
 	//-------TEXTURAS----------------------------
@@ -712,18 +731,27 @@ bool processInput(bool continueApplication) {
 	}
 	TimeManager::Instance().CalculateFrameRate(false);
 	deltaTime = TimeManager::Instance().DeltaTime;
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera->moveFrontCamera(true, deltaTime);
+
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
 		camera->moveFrontCamera(false, deltaTime);
+
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		camera->moveRightCamera(false, deltaTime);
+
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera->moveRightCamera(true, deltaTime);
 
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+	{
 		rot1 += 0.03;
-
+		if(ChangeCamera)
+			camera3P->setPosition(glm::vec3(0.0f, rot1, 0.0f));
+	}
+	
+		
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
 		rot2 -= 0.03;
 
@@ -1570,9 +1598,7 @@ void applicationLoop() {
 		arbol.setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 		arbol.render();
 		
-		arbol.setPosition(glm::vec3(5.0f, -0.7f, 11.0f));
-		arbol.render();
-		arbol.setPosition(glm::vec3(8.0f, -0.7f, 2.0f));
+		arbol.setPosition(glm::vec3(-3.0f, -0.7f, 8.0f));
 		arbol.render();
 		arbol.setPosition(glm::vec3(-5.0f, -0.7f, 8.0f));
 		arbol.render();
@@ -1580,47 +1606,56 @@ void applicationLoop() {
 		arbol.render();
 		arbol.setPosition(glm::vec3(-11.0f, -0.7f, 0.0f));
 		arbol.render();
+		arbol.setPosition(glm::vec3(3.0f, -0.7f, 35.0f));
+		arbol.render();
+		arbol.setPosition(glm::vec3(3.0f, -0.7f, -30.0f));
+		arbol.render();
+		arbol.setPosition(glm::vec3(5.0f, -0.7f, 11.0f));
+		arbol.render();
+		arbol.setPosition(glm::vec3(8.0f, -0.7f, 2.0f));
+		arbol.render();
 
 
 		/* Entrada (fence) */
 		fence.setShader(&shaderTexture);
 		fence.setProjectionMatrix(projection);
 		fence.setViewMatrix(view);
-		fence.setPosition(glm::vec3(3.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(5.0f, -0.1f, 18.0f));
 		fence.setScale(glm::vec3(0.0065f, 0.0065f, 0.0065f));
 		fence.render(); 
 
-		fence.setPosition(glm::vec3(5.5f, -0.1f, 18.0));
+		
+		fence.setPosition(glm::vec3(7.5f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(8.0f, -0.1f, 18.0f));
+		/*fence.setPosition(glm::vec3(11.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(9.5f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(13.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(12.0f, -0.1f, 18.0f));
-		fence.render();
-		fence.setPosition(glm::vec3(14.5f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(15.0f, -0.1f, 18.0f));
 		fence.render();
 		fence.setPosition(glm::vec3(17.0f, -0.1f, 18.0f));
 		fence.render();
-
+		
 		fence.setPosition(glm::vec3(-3.0, -0.1, 18.0));
 		fence.render();
-		fence.setPosition(glm::vec3(-5.5f, -0.1f, 18.0));
+		fence.setPosition(glm::vec3(-5.0f, -0.1f, 18.0));
 		fence.render();
-		fence.setPosition(glm::vec3(-8.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-7.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-9.5f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-9.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-12.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-11.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-14.5f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-13.f, -0.1f, 18.0f));
+		fence.render();
+		fence.setPosition(glm::vec3(-15.0f, -0.1f, 18.0f));
 		fence.render();
 		fence.setPosition(glm::vec3(-17.0f, -0.1f, 18.0f));
 		fence.render();
-
+*/
 		/* Detras*/
 
-		fence.setPosition(glm::vec3(3.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-3.0f, -0.1f, 18.0f));
 		fence.setScale(glm::vec3(0.0065f, 0.0065f, 0.0065f));
 		fence.render();
 
@@ -1628,13 +1663,11 @@ void applicationLoop() {
 		fence.render();
 		fence.setPosition(glm::vec3(8.0f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(9.5f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(10.5, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(12.0f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(15.0f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(14.5f, -0.1f, -18.0f));
-		fence.render();
-		fence.setPosition(glm::vec3(17.0f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(17.5f, -0.1f, -18.0f));
 		fence.render();
 
 		fence.setPosition(glm::vec3(-3.0, -0.1, -18.0));
@@ -1652,6 +1685,28 @@ void applicationLoop() {
 		fence.setPosition(glm::vec3(-17.0f, -0.1f, -18.0f));
 		fence.render();
 
+		/* Puerta */
+		gate.setShader(&shaderTexture);
+		gate.setProjectionMatrix(projection);
+		gate.setViewMatrix(view);
+		gate.setPosition(glm::vec3(1.0f, -0.6f, 18.0f));
+		gate.setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		gate.render();
+
+		/* Lampara */
+		Lampara.setShader(&shaderTexture);
+		Lampara.setProjectionMatrix(projection);
+		Lampara.setViewMatrix(view);
+		Lampara.setPosition(glm::vec3(-1.0f, -0.7f, 10.0f));
+		Lampara.setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		Lampara.render();
+
+		Lampara.setPosition(glm::vec3(-1.0f, -0.7f, 10.0f));
+		Lampara.render();
+		Lampara.setPosition(glm::vec3(1.0f, -0.7f, 15.0f));
+		Lampara.render();
+		Lampara.setPosition(glm::vec3(-1.0f, -0.7f, 15.0f));
+		Lampara.render();
 
 		// Se Dibuja el Skybox
 		GLint oldCullFaceMode;
