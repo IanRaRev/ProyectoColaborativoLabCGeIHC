@@ -57,6 +57,7 @@ Model modelRail;
 Model modelAirCraft;
 Model arturito;
 Model modelTrain;
+Model NaveSW;
 
 // texturas
 GLuint textureID1, textureID2, textureID3, textureCespedID, 
@@ -207,6 +208,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	modelRock.loadModel("../../models/rock/rock.obj");
 	modelRail.loadModel("../../models/railroad/railroad_track.obj");
 	modelAirCraft.loadModel("../../models/Aircraft_obj/E 45 Aircraft_obj.obj");
+	NaveSW.loadModel("../../models/AirPlane/11804_Airplane_v2_l2.obj");
 
 	camera->setPosition(glm::vec3(0.0f, 0.0f, 0.4f));
 	
@@ -482,6 +484,13 @@ void applicationLoop() {
 	float rotationAirCraft = 0.0;
 	bool finishRotation = true;
 	std::stringstream ss;
+
+	float airPlaneZ = 0.0;
+	float airPlaneX = 0.0;
+	float rotationAirPlane = 0.0;
+	int finishRotationAirPlane = 1;
+	bool directionalAirPlane = true;
+
 	/* Este archivo guarada los movimeintos 
 	al dar pipe  se genera un nuevo renglon 
 	guarada cada matris de 4*4 y separa con coma cada valor 
@@ -489,6 +498,8 @@ void applicationLoop() {
 
 	std::ofstream myfile;
 	myfile.open("../../animaciones/animationMano.txt");
+	std::ofstream airPlane;
+	myfile.open("../../animaciones/Avion.txt");
 
 	while (psi) {
 		psi = processInput(true);
@@ -609,9 +620,22 @@ void applicationLoop() {
 			saveFrame = false;
 		}
 
+		/* Nave 
+		NaveSW.setShader(&shaderLighting);
+		NaveSW.setProjectionMatrix(projection);
+		NaveSW.setViewMatrix(view);
+		NaveSW.setScale(glm::vec3(0.001f, 0.001f, 0.001f));
+		NaveSW.render();
+		/* Movimientos del modelo. Desplazamiento en eje Z 
+		glm::mat4 matrixAirPlane = glm::translate(glm::mat4(1.0f), glm::vec3(airPlaneX, 0.0, airPlaneZ));
+		matrixAirPlane = glm::translate(matrixAirPlane, glm::vec3(3.0f, -0.45f, 7.0f));
+		matrixAirPlane= glm::rotate(matrixAirPlane, rotationAirPlane, glm::vec3(0, 1, 0));
+		NaveSW.render(matri);*/
+
 		glfwSwapBuffers(window);
 	}
 	myfile.close();
+
 }
 
 int main(int argc, char ** argv) {

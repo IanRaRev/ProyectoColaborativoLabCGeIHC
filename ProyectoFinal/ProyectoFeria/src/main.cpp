@@ -75,6 +75,8 @@ Model Carro2;
 Model Carro3;
 /* Rueda de la fortuna */
 Model Wheel;
+/* Montaña rusa  */
+Model NaveSW;
 
 GLuint textureID1, textureID2, textureID3,textureID4,
 textureID5,textureID6, textureID7, textureID8, 
@@ -230,7 +232,9 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 
 	/* Ambiente */
 	Suelo.init();
+	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
 	way.init();
+	way.scaleUVS(glm::vec2(2.0, 100.0));
 
 	/* Carros chocones */
 	baseCCH.init();
@@ -242,8 +246,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	/* Cámara tercera persona */
 	camera3P->setPosition(glm::vec3(posX3P, posY3P, posZ3P));
 
-	Suelo.scaleUVS(glm::vec2(100.0, 100.0));
-	way.scaleUVS(glm::vec2(2.0, 100.0));
+
+
 
 
 	/*  M O D E L O S */
@@ -260,6 +264,7 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	Lampara.loadModel("../../models/Lampara/untitled.obj");
 	Lucario.loadModel("../../models/Lucario/FitLucario04.obj");
 	Charizard.loadModel("../../models/Charizard/charizard.obj");
+	NaveSW.loadModel("../../models/AirPlane/11804_Airplane_v2_l2.obj");
 
 	/*
 	//-------TEXTURAS----------------------------
@@ -811,11 +816,11 @@ void applicationLoop() {
 	int finishRotation1 = 1;
 	bool directionAirCraft1 = true;
 
-	float aircraftZ2 = 0.0;
-	float aircraftX2 = 0.0;
-	float rotationAirCraft2 = 0.0;
-	int finishRotation2 = 1;
-	bool directionAirCraft2 = true;
+	float airPlaneZ = 0.0;
+	float airPlaneX = 0.0;
+	float rotationAirPlane = 0.0;
+	int finishRotationAirPlane = 1;
+	bool directionalAirPlane = true;
 
 	while (psi) {
 		psi = processInput(true);
@@ -1343,6 +1348,7 @@ void applicationLoop() {
 		baseCCH.setViewMatrix(view);
 		baseCCH.setPosition(glm::vec3(5.0, -0.699, 5.0));
 		baseCCH.setScale(glm::vec3(5.0f, 0.5f, 5.0f));
+		baseCCH.offsetUVS(glm::vec2(0.01f, 0.01f));
 		baseCCH.render();
 		/*Techo */
 		baseCCH.setPosition(glm::vec3(5.0f, 2.699f, 5.0f));
@@ -1487,7 +1493,7 @@ void applicationLoop() {
 			{
 				rotationAirCraft = glm::radians(360.0f);
 			}
-
+				
 			camera->setPosition(glm::vec3(aircraftX + 3.0, 0.0f, aircraftZ + 7.0));
 
 			/* Animación carro 2*/
@@ -1543,6 +1549,15 @@ void applicationLoop() {
 		Wheel.setScale(glm::vec3(0.275f, 0.275f, 0.275f));
 		Wheel.render();
 
+		/* Nave */
+		NaveSW.setShader(&shaderLighting);
+		NaveSW.setProjectionMatrix(projection);
+		NaveSW.setViewMatrix(view);
+		NaveSW.setPosition(glm::vec3(-20.0f, 10.0f, 20.0f));
+		NaveSW.setScale(glm::vec3(0.001f, 0.001f, 0.001f));
+		NaveSW.render(); 
+
+
 
 
 		/*------------				MANEJO DE LA ILUMINACION			-------------------
@@ -1585,7 +1600,14 @@ void applicationLoop() {
 		Suelo.setPosition(glm::vec3(0.0f, -0.7f, 0.0f));
 		/* (x, y, z)*/
 		Suelo.setScale(glm::vec3(40.0f, 0.001f, 40.0f));
+		/* Offset de textura */
+		Suelo.offsetUVS(glm::vec2(0.0001, 0.0001));
 		Suelo.render();
+
+		if (angle > 2 * M_PI)
+			angle = 0.0;
+		else
+			angle += 0.001;
 
 		/* Camino */
 		glActiveTexture(GL_TEXTURE0);
