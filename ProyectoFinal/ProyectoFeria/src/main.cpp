@@ -67,6 +67,8 @@ Model arbol;
 Model fence; 
 Model gate;
 Model Lampara;
+Model Lucario;
+Model Charizard;
 /* Autos chocones */
 Model Carro;
 Model Carro2;
@@ -88,8 +90,9 @@ GLuint textureCespedID, Camino;
 GLuint plataformaCCH, columsCCH;
 
 /* Camara */
-float posX, posY;
-float posZ = 20.0;
+float posX = 1.0;
+float posY = 0.0;
+float posZ = 24.0;
 
 float posX3P, posY3P, posZ3P;
 
@@ -255,7 +258,8 @@ void init(int width, int height, std::string strTitle, bool bFullScreen) {
 	Carro3.loadModel("../../models/Car3/Flying Charger.obj");
 	gate.loadModel("../../models/FBX/untitled.obj");
 	Lampara.loadModel("../../models/Lampara/untitled.obj");
-
+	Lucario.loadModel("../../models/Lucario/FitLucario04.obj");
+	Charizard.loadModel("../../models/Charizard/charizard.obj");
 
 	/*
 	//-------TEXTURAS----------------------------
@@ -677,9 +681,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 		case GLFW_KEY_3:
 			ilumina2 =false;
 			break;
-
-
-	
 		}
 	}
 }
@@ -745,18 +746,23 @@ bool processInput(bool continueApplication) {
 		camera->moveRightCamera(true, deltaTime);
 
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
-	{
 		rot1 += 0.03;
-		if(ChangeCamera)
-			camera3P->setPosition(glm::vec3(0.0f, rot1, 0.0f));
-	}
 	
 		
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+	{
 		rot2 -= 0.03;
+		/*float giro = glm::radians(0.0);
+		camera->setPosition(glm::vec3(posX, posY, posZ));*/
+
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+	{
 		animation1 = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+		animation1 = false;
 
 	if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
 	{
@@ -793,8 +799,8 @@ void applicationLoop() {
 	float angle = 0.0;
 	float ratio = 20.0;
 
-	float aircraftZ = 0.0;
-	float aircraftX = 0.0;
+	float aircraftZ = 0.0; //0.0
+	float aircraftX = 0.0; // 0.0
 	bool directionAirCraft = true;
 	float rotationAirCraft = 0.0;
 	int finishRotation = 1;
@@ -967,8 +973,15 @@ void applicationLoop() {
 		//				MOVIMIENTOS JUEGO 2
 		matrixs4 = glm::rotate(matrixs4, rot1, glm::vec3(0.0f, 0.1f, 0.0f));
 		matrixs4 = glm::rotate(matrixs4, rot2, glm::vec3(0.0f, 0.1f, 0.0f));
+		/*
+		if(posY > 1.0 && posY < 4.0)
+		{
+			posY = 2.0;
+			pos
+			camera->setPosition(glm::vec3(posX, posY, posZ));
+		}
 
-
+		*/
 		//DISCO DORADO
 		matrixs4 = glm::scale(matrixs4, glm::vec3(3.5f, 0.1f, 3.5f));
 		glBindTexture(GL_TEXTURE_2D, textureID8);
@@ -1475,7 +1488,8 @@ void applicationLoop() {
 				rotationAirCraft = glm::radians(360.0f);
 			}
 
-			
+			camera->setPosition(glm::vec3(aircraftX + 3.0, 0.0f, aircraftZ + 7.0));
+
 			/* Animación carro 2*/
 			if (finishRotation1)
 			{
@@ -1518,14 +1532,15 @@ void applicationLoop() {
 					}
 				}
 			}
+
 		}
 
 		/* Rueda de la Fortuna */
 		Wheel.setShader(&shaderLighting);
 		Wheel.setProjectionMatrix(projection);
 		Wheel.setViewMatrix(view);
-		Wheel.setPosition(glm::vec3(-10.0f, 4.0f, 5.0f));
-		Wheel.setScale(glm::vec3(0.3f, 0.3f, 0.3f));
+		Wheel.setPosition(glm::vec3(-10.0f, 2.0f, 5.0f));
+		Wheel.setScale(glm::vec3(0.275f, 0.275f, 0.275f));
 		Wheel.render();
 
 
@@ -1578,16 +1593,16 @@ void applicationLoop() {
 		way.setShader(&shaderTexture);
 		way.setProjectionMatrix(projection);
 		way.setViewMatrix(view);
-		way.setPosition(glm::vec3(1.0f, -0.699f, 0.0f));
+		way.setPosition(glm::vec3(1.0f, -0.698f, 0.0f));
 		way.setScale(glm::vec3(1.0f, 0.0f, 35.0f));
 		way.render();
 
-		way.setPosition(glm::vec3(0.0f, -0.699f, 0.0f));
+		way.setPosition(glm::vec3(0.0f, -0.698f, 0.0f));
 		way.setScale(glm::vec3(30.0f, 0.0f, 1.0f));
 		way.render();
 
-		way.setPosition(glm::vec3(0.0f, -0.699f, 10.0f));
-		way.setScale(glm::vec3(20.0f, 0.0f, 1.0f));
+		way.setPosition(glm::vec3(0.0f, -0.698f, 10.0f));
+		way.setScale(glm::vec3(30.0f, 0.0f, 1.0f));
 		way.render();
 
 		/* Dibujo de arboles  */
@@ -1606,9 +1621,9 @@ void applicationLoop() {
 		arbol.render();
 		arbol.setPosition(glm::vec3(-11.0f, -0.7f, 0.0f));
 		arbol.render();
-		arbol.setPosition(glm::vec3(3.0f, -0.7f, 35.0f));
+		arbol.setPosition(glm::vec3(3.0f, -0.7f, 17.0f));
 		arbol.render();
-		arbol.setPosition(glm::vec3(3.0f, -0.7f, -30.0f));
+		arbol.setPosition(glm::vec3(3.0f, -0.7f, -17.0f));
 		arbol.render();
 		arbol.setPosition(glm::vec3(5.0f, -0.7f, 11.0f));
 		arbol.render();
@@ -1627,88 +1642,108 @@ void applicationLoop() {
 		
 		fence.setPosition(glm::vec3(7.5f, -0.1f, 18.0f));
 		fence.render();
-		/*fence.setPosition(glm::vec3(11.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(10.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(13.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(12.5f, -0.1f, 18.0f));
 		fence.render();
 		fence.setPosition(glm::vec3(15.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(17.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(17.5f, -0.1f, 18.0f));
 		fence.render();
 		
-		fence.setPosition(glm::vec3(-3.0, -0.1, 18.0));
+
+		fence.setPosition(glm::vec3(-2.5f, -0.1f, 18.0f));
 		fence.render();
 		fence.setPosition(glm::vec3(-5.0f, -0.1f, 18.0));
 		fence.render();
-		fence.setPosition(glm::vec3(-7.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-7.5f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-9.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-10.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-11.0f, -0.1f, 18.0f));
-		fence.render();
-		fence.setPosition(glm::vec3(-13.f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-12.5f, -0.1f, 18.0f));
 		fence.render();
 		fence.setPosition(glm::vec3(-15.0f, -0.1f, 18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-17.0f, -0.1f, 18.0f));
+		fence.setPosition(glm::vec3(-17.5f, -0.1f, 18.0f));
 		fence.render();
-*/
+
 		/* Detras*/
 
-		fence.setPosition(glm::vec3(-3.0f, -0.1f, 18.0f));
-		fence.setScale(glm::vec3(0.0065f, 0.0065f, 0.0065f));
+		fence.setPosition(glm::vec3(5.0f, -0.1f, -18.0f));
 		fence.render();
-
-		fence.setPosition(glm::vec3(5.5f, -0.1f, -18.0));
+		fence.setPosition(glm::vec3(7.5f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(8.0f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(10.0f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(10.5, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(12.5f, -0.1f, -18.0f));
 		fence.render();
 		fence.setPosition(glm::vec3(15.0f, -0.1f, -18.0f));
 		fence.render();
 		fence.setPosition(glm::vec3(17.5f, -0.1f, -18.0f));
 		fence.render();
 
-		fence.setPosition(glm::vec3(-3.0, -0.1, -18.0));
+
+		fence.setPosition(glm::vec3(-5.0f, -0.1f, -18.0));
 		fence.render();
-		fence.setPosition(glm::vec3(-5.5f, -0.1f, -18.0));
+		fence.setPosition(glm::vec3(-7.5f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-8.0f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(-10.0f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-9.5f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(-12.5f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-12.0f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(-15.0f, -0.1f, -18.0f));
 		fence.render();
-		fence.setPosition(glm::vec3(-14.5f, -0.1f, -18.0f));
-		fence.render();
-		fence.setPosition(glm::vec3(-17.0f, -0.1f, -18.0f));
+		fence.setPosition(glm::vec3(-17.5f, -0.1f, -18.0f));
 		fence.render();
 
 		/* Puerta */
-		gate.setShader(&shaderTexture);
+		gate.setShader(&shaderLighting);
 		gate.setProjectionMatrix(projection);
 		gate.setViewMatrix(view);
-		gate.setPosition(glm::vec3(1.0f, -0.6f, 18.0f));
-		gate.setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		gate.setPosition(glm::vec3(1.0f, -0.7f, 18.0f));
+		gate.setScale(glm::vec3(0.3f, 0.3f, 0.3f));
 		gate.render();
 
 		/* Lampara */
 		Lampara.setShader(&shaderTexture);
 		Lampara.setProjectionMatrix(projection);
 		Lampara.setViewMatrix(view);
-		Lampara.setPosition(glm::vec3(-1.0f, -0.7f, 10.0f));
-		Lampara.setScale(glm::vec3(0.2f, 0.2f, 0.2f));
+		Lampara.setPosition(glm::vec3(-3.0f, 0.0f, 9.0f));
+		Lampara.setScale(glm::vec3(0.15, 0.15f, 0.15f));
+		Lampara.render();
+		
+		Lampara.setPosition(glm::vec3(-3.0f, 0.0f, 13.0f));
+		Lampara.render();
+		Lampara.setPosition(glm::vec3(-3.0f, 0.0f, 5.0f));
+		Lampara.render();
+		Lampara.setPosition(glm::vec3(-3.0f, 0.0f, 1.0f));
+		Lampara.render();
+		
+		Lampara.setPosition(glm::vec3(-5.0f, 0.0f, 7.0f));
+		Lampara.render();
+		Lampara.setPosition(glm::vec3(-5.0f, 0.0f, 3.0f));
+		Lampara.render();
+		Lampara.setPosition(glm::vec3(-5.0f, 0.0f, -1.0f));
 		Lampara.render();
 
-		Lampara.setPosition(glm::vec3(-1.0f, -0.7f, 10.0f));
-		Lampara.render();
-		Lampara.setPosition(glm::vec3(1.0f, -0.7f, 15.0f));
-		Lampara.render();
-		Lampara.setPosition(glm::vec3(-1.0f, -0.7f, 15.0f));
-		Lampara.render();
 
-		// Se Dibuja el Skybox
+		Lucario.setShader(&shaderLighting);
+		Lucario.setProjectionMatrix(projection);
+		Lucario.setViewMatrix(view);
+		Lucario.setPosition(glm::vec3(2.0f, -0.698f, 18.0f));
+		Lucario.setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		Lucario.render();
+
+		Charizard.setShader(&shaderLighting);
+		Charizard.setProjectionMatrix(projection);
+		Charizard.setViewMatrix(view);
+		Charizard.setPosition(glm::vec3(0.0f, -0.698f, 18.0f));
+		Charizard.setScale(glm::vec3(0.1f, 0.1f, 0.1f));
+		Charizard.render();
+
+
+
+		/* Skybox */
 		GLint oldCullFaceMode;
 		GLint oldDepthFuncMode;
 		glGetIntegerv(GL_CULL_FACE_MODE, &oldCullFaceMode);
